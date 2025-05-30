@@ -1,0 +1,5 @@
+# Normalize line endings
+* text=auto
+
+# Ignore makefile from the repo's languages because it was not created by me
+Makefile linguist-vendored
