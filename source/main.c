@@ -52,7 +52,7 @@ void draw_fruit(Point position)
 void draw_snake_node(Node* node)
 {
 	Point position = node->position;
-	DRAW_SQUARE(SQUARE_SIZE*position.x,SQUARE_SIZE*position.y,1,SQUARE_SIZE,C2D_Color32(78,124,246,122));
+	DRAW_SQUARE(SQUARE_SIZE*position.x,SQUARE_SIZE*position.y,1,SQUARE_SIZE,C2D_Color32(78,124,246,255));
 	
 	if (position.y != TOP_SCREEN_HEIGHT / SQUARE_SIZE - 2)
 		C2D_DrawRectSolid(SQUARE_SIZE*position.x, SQUARE_SIZE*position.y + SQUARE_SIZE,0.5,SQUARE_SIZE, SQUARE_SIZE / 5,shadow_color);
@@ -60,14 +60,14 @@ void draw_snake_node(Node* node)
 
 void update_direction(Snake* snake, u32 mask)
 {
-	if ((mask & KEY_RIGHT || mask & KEY_CSTICK_RIGHT) && snake->direction != LEFT)
-		snake->direction = RIGHT;
-	else if ((mask & KEY_LEFT || mask & KEY_CSTICK_LEFT) && snake->direction != RIGHT)
-		snake->direction = LEFT;
-	else if ((mask & KEY_DOWN || mask & KEY_CSTICK_DOWN) && snake->direction != UP)
-		snake->direction = DOWN;
-	else if ((mask & KEY_UP || mask & KEY_CSTICK_UP) && snake->direction != DOWN)
-		snake->direction = UP;
+	if (mask & KEY_RIGHT || mask & KEY_CSTICK_RIGHT)
+		change_direction(snake, RIGHT);
+	else if (mask & KEY_LEFT || mask & KEY_CSTICK_LEFT)
+		change_direction(snake, LEFT);
+	else if (mask & KEY_DOWN || mask & KEY_CSTICK_DOWN)
+		change_direction(snake, DOWN);
+	else if (mask & KEY_UP || mask & KEY_CSTICK_UP)
+		change_direction(snake, UP);
 }
 
 int main(int argc, char **argv)
@@ -115,7 +115,9 @@ int main(int argc, char **argv)
 		}
 
 		C3D_FrameBegin(C3D_FRAME_SYNCDRAW);
-		if(end_game(snake)) break;
+		if(end_game(snake)) {
+			border_color = C2D_Color32(255, 0, 0, 255);
+		};
 		
 		// Draw top
 		C2D_SceneBegin(top);
