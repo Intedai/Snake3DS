@@ -46,6 +46,10 @@ GFXBUILD	:=	$(BUILD)
 #ROMFS		:=	romfs
 #GFXBUILD	:=	$(ROMFS)/gfx
 
+APP_TITLE = Snake
+APP_DESCRIPTION = Simple Snake for the 3DS 
+APP_AUTHOR = Intedai
+
 #---------------------------------------------------------------------------------
 # options for code generation
 #---------------------------------------------------------------------------------

@@ -46,7 +46,17 @@ bool insert_at_front(Snake *snake, Point position)
     return true;
 }
 
-/* // --------- NOT NEEDED ----------------------
+void change_direction(Snake* snake, Direction direction)
+{
+    if (
+        (snake->direction == RIGHT && direction == LEFT) ||
+        (snake->direction == LEFT && direction == RIGHT) ||
+        (snake->direction == UP && direction == DOWN) ||
+        (snake->direction == DOWN && direction == UP)
+    )
+    return;
+    snake->direction = direction;
+}
 bool push_back_node(Snake *snake, Point position)
 {
     Node *node = new_node(position);
@@ -65,10 +75,10 @@ bool push_back_node(Snake *snake, Point position)
         node->prev = snake->tail;
         snake->tail =node;
     }
+    snake->size++;
 
     return true;
 }
-*/
 
 bool init_snake(Snake* snake, Point starting_position)
 {
@@ -88,7 +98,7 @@ bool init_snake(Snake* snake, Point starting_position)
     for(int i = 0; i < START_SIZE; i++)
     {
         Point position = {starting_position.x - i, starting_position.y}; 
-        if(!insert_at_front(snake,position))
+        if(!push_back_node(snake,position))
             return false;
     }
     return true;
@@ -158,7 +168,7 @@ bool end_game(Snake *snake)
     while(current != NULL)
     {
         if (equal_points(head_position, current->position))
-            /*return true*/; // FOR NOW THIS DOESNT WORK! IDK WHY IT RETURNS TRUE ON START
+            return true;
             
         current = current->next;
     }
