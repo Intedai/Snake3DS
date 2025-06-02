@@ -91,6 +91,7 @@ bool init_snake(Snake* snake, Point starting_position)
     )
         return false;
     snake->size = 0;
+    snake->score = 0;
     snake->direction = RIGHT;
     snake->head = NULL;
     snake->tail = NULL;
@@ -163,8 +164,8 @@ bool end_game(Snake *snake)
        )
        return true;
        
+    // Check if collides with itself
     Node *current = snake->head->next;
-    
     while(current != NULL)
     {
         if (equal_points(head_position, current->position))
