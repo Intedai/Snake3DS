@@ -20,6 +20,7 @@ typedef struct Node
 typedef struct
 {
     int size;
+    int score;
     Direction direction;
     Node *head;
     Node *tail;

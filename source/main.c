@@ -5,8 +5,7 @@
 #include "globals.h"
 #include "point.h"
 #include "snake.h"
-
-#define SQUARE_SIZE 20
+#include "fruit.h"
 
 #define DRAW_SQUARE(x,y,z,size,color) C2D_DrawRectSolid(x,y,z,size,size,color)
 #define shadow_color C2D_Color32(148, 189, 70, 255)
@@ -15,9 +14,9 @@ void draw_background() {
     u32 light_color = C2D_Color32(170, 215, 81, 255);
     u32 dark_color = C2D_Color32(162, 209, 73, 255);
 
-	for (int i = 1; i < TOP_SCREEN_HEIGHT / SQUARE_SIZE - 1; i++)
+	for (int i = 1; i < BOTTOM_BORDER; i++)
 	{
-		for(int j = 1; j < TOP_SCREEN_WIDTH / SQUARE_SIZE - 1; j++)
+		for(int j = 1; j < RIGHT_BORDER; j++)
 		{
 			u32 curr = j % 2 == i % 2 ? light_color : dark_color;
 			DRAW_SQUARE(j * SQUARE_SIZE,   i * SQUARE_SIZE, 0, SQUARE_SIZE, curr);
@@ -33,7 +32,7 @@ void draw_bottom()
 	C2D_DrawRectSolid(dist,dist, 0, BOTTOM_SCREEN_WIDTH - dist * 2, BOTTOM_SCREEN_HEIGHT - dist * 2, bottom_color);
 }
 
-void exit_all()
+void quit_game()
 {
 	cfguExit();
 	C2D_Fini();
@@ -41,12 +40,11 @@ void exit_all()
 	gfxExit();
 }
 
-void draw_fruit(Point position)
+void draw_fruit(Fruit fruit)
 {
 	int dist = SQUARE_SIZE / 5;
-	u32 fruit_color = C2D_Color32(231, 71, 29, 255);
-	DRAW_SQUARE(position.x * SQUARE_SIZE + dist, position.y * SQUARE_SIZE + dist, 0.1, SQUARE_SIZE - dist * 2, fruit_color);
-	C2D_DrawRectSolid(position.x * SQUARE_SIZE + dist, SQUARE_SIZE*position.y +  SQUARE_SIZE - dist, 0.1,SQUARE_SIZE - dist * 2, SQUARE_SIZE / 7, shadow_color);
+	DRAW_SQUARE(fruit.position.x * SQUARE_SIZE + dist, fruit.position.y * SQUARE_SIZE + dist, 0.1, SQUARE_SIZE - dist * 2, fruit.color);
+	C2D_DrawRectSolid(fruit.position.x * SQUARE_SIZE + dist, SQUARE_SIZE*fruit.position.y +  SQUARE_SIZE - dist, 0.1,SQUARE_SIZE - dist * 2, SQUARE_SIZE / 7, shadow_color);
 }
 
 void draw_snake_node(Node* node)
@@ -72,7 +70,6 @@ void update_direction(Snake* snake, u32 mask)
 
 int main(int argc, char **argv)
 {
-	C2D_Font font = C2D_FontLoadSystem(CFG_REGION_USA);
 	u64 last_move_time = osGetTime();
 	const u64 moveDelay = 100;
 
@@ -90,27 +87,43 @@ int main(int argc, char **argv)
 
 	u32 border_color = C2D_Color32(87, 138, 52, 255);
 
-	Point start_position = {8,8};
+	Point start_position = {4,4};
 
 	Snake *snake = create_snake();
+
+	if (!snake)
+	{
+		quit_game();
+		return 1;
+	}
+
 	init_snake(snake,start_position);
 
-	Point fruit = {3,3};
+	int fruit_count = 5;
+	Fruit *fruits = create_fruits(fruit_count);
+
+	if(!fruits)
+	{
+		quit_game();
+		free_snake(snake);
+		return 1;
+	}
+
+	init_fruits(fruits, fruit_count, snake);
+
 	while (aptMainLoop())
 	{
 		hidScanInput();
 		u32 kDown = hidKeysDown();
 
-		if (kDown & KEY_START) {exit_all(); break;}
+		if (kDown & KEY_START) break;
+
 		update_direction(snake,kDown);
 
 		u64 now = osGetTime();
 		if (now - last_move_time >= moveDelay)
 		{
-			if (equal_points(fruit, snake->head->position))
-				move_snake(snake, true);
-			else
-				move_snake(snake, false);
+			move_snake(snake, fruit_eaten(snake, fruits, fruit_count));
 			last_move_time = now;
 		}
 
@@ -126,7 +139,10 @@ int main(int argc, char **argv)
 
 
 		foreach_node(snake, draw_snake_node);
-		draw_fruit(fruit);
+		for(int i = 0; i < fruit_count; i++)
+		{
+			draw_fruit(fruits[i]);
+		}
 		consoleClear();
 
 
@@ -135,6 +151,10 @@ int main(int argc, char **argv)
 		draw_bottom();
 		C3D_FrameEnd(0);
 	}
-	exit_all();
+
+	quit_game();
+	free_snake(snake);
+	free(fruits);
+
 	return 0;
 }
