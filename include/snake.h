@@ -35,7 +35,7 @@ bool end_game(Snake *snake);
 void move_snake(Snake* snake, bool ate_fruit);
 void foreach_node(Snake *snake, void (*func)(Node *));
 bool push_back_node(Snake *snake, Point position);
-void change_direction(Snake* snake, Direction direction);
+bool change_direction(Snake* snake, Direction direction);
 void free_snake(Snake *snake);
 
 #endif

@@ -46,7 +46,7 @@ bool insert_at_front(Snake *snake, Point position)
     return true;
 }
 
-void change_direction(Snake* snake, Direction direction)
+bool change_direction(Snake* snake, Direction direction)
 {
     if (
         (snake->direction == RIGHT && direction == LEFT) ||
@@ -54,8 +54,9 @@ void change_direction(Snake* snake, Direction direction)
         (snake->direction == UP && direction == DOWN) ||
         (snake->direction == DOWN && direction == UP)
     )
-    return;
+        return false;
     snake->direction = direction;
+    return true;
 }
 bool push_back_node(Snake *snake, Point position)
 {
