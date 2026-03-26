@@ -56,16 +56,21 @@ void draw_snake_node(Node* node)
 		C2D_DrawRectSolid(SQUARE_SIZE*position.x, SQUARE_SIZE*position.y + SQUARE_SIZE,0.5,SQUARE_SIZE, SQUARE_SIZE / 5,shadow_color);
 }
 
-void update_direction(Snake* snake, u32 mask)
+bool update_direction(Snake* snake, u32 mask)
 {
+	Direction direction;
 	if (mask & KEY_RIGHT || mask & KEY_CSTICK_RIGHT)
-		change_direction(snake, RIGHT);
+		direction = RIGHT;
 	else if (mask & KEY_LEFT || mask & KEY_CSTICK_LEFT)
-		change_direction(snake, LEFT);
+		direction = LEFT;
 	else if (mask & KEY_DOWN || mask & KEY_CSTICK_DOWN)
-		change_direction(snake, DOWN);
+		direction = DOWN;
 	else if (mask & KEY_UP || mask & KEY_CSTICK_UP)
-		change_direction(snake, UP);
+		direction = UP;
+	else
+		return false;
+
+	return change_direction(snake, direction);
 }
 
 int main(int argc, char **argv)
@@ -110,6 +115,8 @@ int main(int argc, char **argv)
 	}
 
 	init_fruits(fruits, fruit_count, snake);
+	
+	bool choseDirection = false;
 
 	while (aptMainLoop())
 	{
@@ -118,13 +125,17 @@ int main(int argc, char **argv)
 
 		if (kDown & KEY_START) break;
 
-		update_direction(snake,kDown);
+		if (!choseDirection && update_direction(snake,kDown))
+		{
+			choseDirection = true;
+		}
 
 		u64 now = osGetTime();
 		if (now - last_move_time >= moveDelay)
 		{
 			move_snake(snake, fruit_eaten(snake, fruits, fruit_count));
 			last_move_time = now;
+			choseDirection = false;
 		}
 
 		C3D_FrameBegin(C3D_FRAME_SYNCDRAW);
